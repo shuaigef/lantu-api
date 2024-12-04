@@ -59,6 +59,7 @@ import {updatePersonalDetail, updatePersonalPassword} from "../../api/user";
 import {Message} from "@arco-design/web-vue";
 import {LocalStorageEnum} from "../../constants/index";
 import {useRouter} from "vue-router";
+import {logout} from "../../api/system";
 
 const systemStore = useSystemStore()
 const { loginUser } = storeToRefs(systemStore)
@@ -100,7 +101,12 @@ const handleUpdatePassword = async () => {
     const res = await updatePersonalPassword(passwordFormData.value)
     if (res.code == 0) {
       Message.success(res.message)
-      // todo 调用后端登出接口
+      // 调用后端登出接口
+      const logoutRes = await logout()
+      if (logoutRes.code != 0) {
+        console.log("修改密码-登出失败:", logoutRes.message)
+      }
+      // 移除缓存
       localStorage.removeItem(LocalStorageEnum.JWT)
       localStorage.removeItem(LocalStorageEnum.LOGIN_USER)
       loginUser.value = null

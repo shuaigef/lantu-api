@@ -26,3 +26,11 @@ export async function sendEmailVerificationCode(email: string) {
     })
 }
 
+export async function logout() {
+    return http.request<boolean>({
+        url: "/system/logout",
+        method: "POST"
+    })
+}
+
+

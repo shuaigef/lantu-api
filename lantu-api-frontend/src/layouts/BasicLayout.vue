@@ -89,8 +89,10 @@ import {useRoute, useRouter} from "vue-router";
 import {LocalStorageEnum} from "../constants";
 import {useSystemStore} from "../store";
 import {storeToRefs} from "pinia";
-import { Icon } from '@arco-design/web-vue';
+import {Icon, Message} from '@arco-design/web-vue';
 import {COS_HOST, LOGO_URL} from '../constants';
+import {updatePersonalPassword} from "../api/user";
+import {logout} from "../api/system";
 
 const IconFont = Icon.addFromIconFontCn({ src: 'https://at.alicdn.com/t/c/font_4738168_ijmht3p7999.js' });
 
@@ -115,14 +117,20 @@ const toPage = (key) => {
 }
 toPage(defaultSelectedKeys.value[0])
 
-const toLogout = () => {
-  // todo 调用后端登出接口
-  localStorage.removeItem(LocalStorageEnum.JWT)
-  localStorage.removeItem(LocalStorageEnum.LOGIN_USER)
-  loginUser.value = null
-  router.push({
-    name: "login"
-  })
+const toLogout = async () => {
+  try {
+    const res = await logout()
+    Message.success(res.message)
+  } catch (error) {
+    Message.error(error.response?.data?.message || "系统错误")
+  } finally {
+    localStorage.removeItem(LocalStorageEnum.JWT)
+    localStorage.removeItem(LocalStorageEnum.LOGIN_USER)
+    loginUser.value = null
+    await router.push({
+      name: "login"
+    })
+  }
 }
 const toAccountSetting = () => {
   router.push({

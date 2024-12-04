@@ -81,6 +81,14 @@ public class SystemController {
         List<Authority> authorityList = authorityService.findMenuTree(currentUserId);
         SessionUser sessionUser =
                 (SessionUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        // 将 jwt 存入 redis
+        stringRedisTemplate.opsForValue().set(
+                RedisConstant.LOGIN_USER + currentUserId,
+                jwt,
+                RedisConstant.LOGIN_USER_TIME,
+                RedisConstant.LOGIN_USER_TIME_UNIT);
+
         return new ResponseEntity<>(
                 ResultUtils.success(new LoginUserVO(jwt, sessionUser, authorityList)),
                 httpHeaders, HttpStatus.OK);
@@ -105,11 +113,29 @@ public class SystemController {
         // 验证码 - 随机6位数数字验证码
         String verificationCode = RandomUtil.randomNumbers(6);
         // 存入 redis
-        stringRedisTemplate.opsForValue().set(RedisConstant.VERIFICATION_CODE_KEY + email, verificationCode, RedisConstant.VERIFICATION_CODE_TIME, TimeUnit.MINUTES);
-        stringRedisTemplate.opsForValue().set(RedisConstant.INTERVAL_KEY + email, "true", RedisConstant.INTERVAL_KEY_TIME, TimeUnit.MINUTES);
+        stringRedisTemplate.opsForValue().set(
+                RedisConstant.VERIFICATION_CODE_KEY + email,
+                verificationCode,
+                RedisConstant.VERIFICATION_CODE_TIME,
+                RedisConstant.VERIFICATION_CODE_TIME_UNIT);
+        stringRedisTemplate.opsForValue().set(
+                RedisConstant.INTERVAL_KEY + email,
+                "true",
+                RedisConstant.INTERVAL_KEY_TIME,
+                RedisConstant.INTERVAL_KEY_TIME_UNIT);
         // 发送邮件
         MailUtil.send(email, "蓝图API开放平台注册验证码", "【蓝图API开放平台】验证码 " + verificationCode + " 用于邮箱注册验证，5分钟内有效，请勿泄漏和转发。", false);
         return ResultUtils.success();
+    }
+
+    @ApiOperation("登出接口")
+    @PostMapping("/logout")
+    public BaseResponse<Boolean> logout() {
+        // 从 redis 移除 jwt
+        long currentUserId = SecurityUtils.getCurrentUserId();
+        Boolean result = stringRedisTemplate.delete(RedisConstant.LOGIN_USER + currentUserId);
+
+        return ResultUtils.success(result, "登出成功");
     }
 
 }
