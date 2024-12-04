@@ -19,12 +19,14 @@ import com.shuaigef.lantuapibackend.service.UserService;
 import com.shuaigef.lantuapicommon.common.BaseResponse;
 import com.shuaigef.lantuapicommon.common.ErrorCode;
 import com.shuaigef.lantuapicommon.common.ResultUtils;
+import com.shuaigef.lantuapicommon.model.entity.InterfaceInfo;
 import com.shuaigef.lantuapicommon.model.entity.User;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.ArrayList;
 import javax.annotation.Resource;
 import javax.validation.Valid;
+import javax.xml.transform.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -142,6 +144,13 @@ public class UserController {
     public BaseResponse<Boolean> userUpdatePassword(@Valid @RequestBody
             UserUpdatePasswordRequest userUpdatePasswordRequest) {
         return ResultUtils.success(userService.updatePersonalPassword(userUpdatePasswordRequest), "修改密码成功");
+    }
+
+    @ApiOperation("获取我的积分")
+    @GetMapping("/my/points")
+    public BaseResponse<Integer> getMyPoints() {
+        User currentUser = userService.getCurrentUser();
+        return ResultUtils.success(currentUser.getUserPoints(), "获取我的积分成功");
     }
 
 

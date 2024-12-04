@@ -61,3 +61,10 @@ export async function updatePersonalPassword(data: API.UserUpdatePasswordParams)
     })
 }
 
+export async function getMyPoints() {
+    return http.request<number>({
+        url: "/manage/user/my/points",
+        method: "GET"
+    })
+}
+

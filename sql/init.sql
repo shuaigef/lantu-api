@@ -138,3 +138,15 @@ create table if not exists `user_interface_info`
     `is_delete` tinyint default 0 not null comment '是否删除'
 ) comment '用户调用接口关系' collate = utf8mb4_unicode_ci;
 
+use lantu_api;
+-- 每日签到表
+create table if not exists daily_checkin
+(
+    id            bigint auto_increment comment 'id' primary key,
+    userId        bigint                                 null comment '用户id',
+    points        int                                    not null comment '积分',
+    checkin_time date                                   not null comment '签到时间',
+    create_time   datetime     default CURRENT_TIMESTAMP not null comment '创建时间',
+    update_time   datetime     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    is_delete     tinyint      default 0                 not null comment '是否删除'
+) comment '每日签到表' collate = utf8mb4_unicode_ci;

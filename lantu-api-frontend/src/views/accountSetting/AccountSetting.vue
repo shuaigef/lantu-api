@@ -47,6 +47,18 @@
       </a-form>
     </div>
   </a-card>
+
+  <a-card title="我的积分" :bordered="false">
+<!--    <template #extra>-->
+<!--      <a-button type="primary" @click="handleUpdatePassword">充值</a-button>-->
+<!--    </template>-->
+    <div>
+      <div>
+        <span>我的积分：</span><span style="color: #f10909; font-size: 16px">{{ myPoints }}</span>
+      </div>
+      <a-button style="margin-top: 15px" type="primary" :disabled="isCheckinFlag" @click="handleCheckin">每日签到</a-button>
+    </div>
+  </a-card>
 </template>
 
 <script setup lang="ts">
@@ -55,11 +67,12 @@ import {storeToRefs} from "pinia";
 import {ref} from "vue";
 import {FileUploadBizEnum} from '../../constants';
 import FileUpload from "../../components/FileUpload.vue";
-import {updatePersonalDetail, updatePersonalPassword} from "../../api/user";
+import {getMyPoints, updatePersonalDetail, updatePersonalPassword} from "../../api/user";
 import {Message} from "@arco-design/web-vue";
 import {LocalStorageEnum} from "../../constants/index";
 import {useRouter} from "vue-router";
 import {logout} from "../../api/system";
+import {handleDailyCheckin, isCheckin} from "../../api/dailyCheckin";
 
 const systemStore = useSystemStore()
 const { loginUser } = storeToRefs(systemStore)
@@ -127,6 +140,45 @@ const handleUpdatePassword = async () => {
     }
   }
 }
+
+const myPoints = ref(0)
+const isCheckinFlag = ref(false)
+
+const handleCheckin = async () => {
+  try {
+    const res = await handleDailyCheckin()
+    if (res.code == 0) {
+      Message.success(res.message)
+      await init()
+    } else {
+      Message.error(res.message)
+    }
+  } catch (error) {
+    Message.error(error.response?.data?.message || "系统错误")
+  }
+}
+
+const init = async () => {
+  try {
+    // 查询我的积分
+    const res = await getMyPoints()
+    if (res.code == 0) {
+      myPoints.value = res.data
+    } else {
+      Message.error(res.message)
+    }
+    // 查询今日是否签到
+    const isCheckinRes = await isCheckin()
+    if (isCheckinRes.code == 0) {
+      isCheckinFlag.value = isCheckinRes.data
+    } else {
+      Message.error(isCheckinRes.message)
+    }
+  } catch (error) {
+    Message.error(error.response?.data?.message || "系统错误")
+  }
+}
+init()
 </script>
 
 <style scoped lang="scss">
