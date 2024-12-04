@@ -146,11 +146,10 @@ public class UserController {
         return ResultUtils.success(userService.updatePersonalPassword(userUpdatePasswordRequest), "修改密码成功");
     }
 
-    @ApiOperation("获取我的积分")
-    @GetMapping("/my/points")
-    public BaseResponse<Integer> getMyPoints() {
-        User currentUser = userService.getCurrentUser();
-        return ResultUtils.success(currentUser.getUserPoints(), "获取我的积分成功");
+    @ApiOperation("获取我的用户信息")
+    @GetMapping("/my/detail")
+    public BaseResponse<UserVO> getMyUserDetail() {
+        return ResultUtils.success(userService.getUserVO(userService.getCurrentUser()));
     }
 
 

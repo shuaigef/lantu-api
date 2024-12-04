@@ -144,6 +144,8 @@ declare namespace API {
         roleId?: string,
         userRole?: string,
         userPoints?: number,
+        accessKey?: string,
+        secretKey?: string,
         createTime?: string
     }
 

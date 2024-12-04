@@ -43,7 +43,6 @@
         <a-form-item field="checkPassword" label="确认密码">
           <a-input-password v-model="passwordFormData.checkPassword" placeholder="请输入确认密码"/>
         </a-form-item>
-
       </a-form>
     </div>
   </a-card>
@@ -54,7 +53,7 @@
 <!--    </template>-->
     <div>
       <div>
-        <span>我的积分：</span><span style="color: #f10909; font-size: 16px">{{ myPoints }}</span>
+        <span>我的积分：</span><span style="color: #f10909; font-size: 16px">{{ userDetail.userPoints || 0 }}</span>
       </div>
       <a-button style="margin-top: 15px" type="primary" :disabled="isCheckinFlag" @click="handleCheckin">每日签到</a-button>
     </div>
@@ -67,7 +66,7 @@ import {storeToRefs} from "pinia";
 import {ref} from "vue";
 import {FileUploadBizEnum} from '../../constants';
 import FileUpload from "../../components/FileUpload.vue";
-import {getMyPoints, updatePersonalDetail, updatePersonalPassword} from "../../api/user";
+import {getMyUserDetail, updatePersonalDetail, updatePersonalPassword} from "../../api/user";
 import {Message} from "@arco-design/web-vue";
 import {LocalStorageEnum} from "../../constants/index";
 import {useRouter} from "vue-router";
@@ -76,6 +75,8 @@ import {handleDailyCheckin, isCheckin} from "../../api/dailyCheckin";
 
 const systemStore = useSystemStore()
 const { loginUser } = storeToRefs(systemStore)
+const userDetail = ref<API.User>()
+
 const personalDetailFormData = ref<API.UserUpdatePersonalDetailParams>({
   username: loginUser.value.userInfo.username,
   nickname: loginUser.value.userInfo.nickname,
@@ -141,7 +142,6 @@ const handleUpdatePassword = async () => {
   }
 }
 
-const myPoints = ref(0)
 const isCheckinFlag = ref(false)
 
 const handleCheckin = async () => {
@@ -160,10 +160,10 @@ const handleCheckin = async () => {
 
 const init = async () => {
   try {
-    // 查询我的积分
-    const res = await getMyPoints()
+    // 查询我的用户信息
+    const res = await getMyUserDetail()
     if (res.code == 0) {
-      myPoints.value = res.data
+      userDetail.value = res.data
     } else {
       Message.error(res.message)
     }

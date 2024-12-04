@@ -83,6 +83,18 @@ public class UserVO implements Serializable {
     private Integer userPoints;
 
     /**
+     * 签名 accessKey
+     */
+    @ApiModelProperty(value = "签名 accessKey")
+    private String accessKey;
+
+    /**
+     * 签名 secretKey
+     */
+    @ApiModelProperty(value = "签名 secretKey")
+    private String secretKey;
+
+    /**
      * 创建时间
      */
     @ApiModelProperty(value = "创建时间")
