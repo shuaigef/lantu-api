@@ -24,3 +24,11 @@ export const enum FileUploadBizEnum {
     /** 接口头像 */
     INTERFACE_AVATAR = "interface_avatar"
 }
+
+/** 验证码发送业务类型枚举 */
+export const enum VerificationCodeBizEnum {
+    /** 邮箱注册 */
+    EMAIL_REGISTER = "email_register",
+    /** 邮箱修改 */
+    EMAIL_UPDATE = "email_update"
+}

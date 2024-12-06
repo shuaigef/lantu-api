@@ -1,29 +1,33 @@
 package com.shuaigef.lantuapibackend.model.dto.user;
 
-import com.shuaigef.lantuapibackend.common.utils.RegexUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
 import lombok.Data;
 
 /**
- * 邮箱验证码发送请求
+ * 验证码发送请求
  *
  * @author <a href="https://github.com/shuaigef">shuaigef</a>
  */
-@ApiModel(description = "邮箱验证码发送请求")
+@ApiModel(description = "验证码发送请求")
 @Data
 public class VerificationCodeSendRequest implements Serializable {
 
     /**
-     * 邮箱
+     * 验证码发送对象
      */
-    @ApiModelProperty(value = "邮箱")
-    @NotBlank(message = "邮箱不能为空")
-    @Pattern(regexp = RegexUtils.EMAIL_REGEX, message = "邮箱错误")
-    private String email;
+    @ApiModelProperty(value = "验证码发送对象")
+    @NotBlank(message = "验证码发送对象不能为空")
+    private String target;
+
+    /**
+     * 验证码业务类型
+     */
+    @ApiModelProperty(value = "验证码业务类型")
+    @NotBlank(message = "biz 不能为空")
+    private String biz;
 
     private static final long serialVersionUID = 1L;
 

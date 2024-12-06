@@ -14,6 +14,7 @@ import com.shuaigef.lantuapibackend.constant.SecurityConstant;
 import com.shuaigef.lantuapibackend.exception.BusinessException;
 import com.shuaigef.lantuapibackend.mapper.UserMapper;
 import com.shuaigef.lantuapibackend.model.dto.user.UserAddRequest;
+import com.shuaigef.lantuapibackend.model.dto.user.UserEmailUpdateRequest;
 import com.shuaigef.lantuapibackend.model.dto.user.UserQueryRequest;
 import com.shuaigef.lantuapibackend.model.dto.user.UserRegisterRequest;
 import com.shuaigef.lantuapibackend.model.dto.user.UserUpdatePasswordRequest;
@@ -21,6 +22,7 @@ import com.shuaigef.lantuapibackend.model.dto.user.UserUpdatePersonalDetailReque
 import com.shuaigef.lantuapibackend.model.dto.user.UserUpdateRequest;
 import com.shuaigef.lantuapibackend.model.entity.Role;
 import com.shuaigef.lantuapibackend.model.enums.UserGenderEnum;
+import com.shuaigef.lantuapibackend.model.enums.VerificationCodeBizEnum;
 import com.shuaigef.lantuapibackend.model.vo.UserVO;
 import com.shuaigef.lantuapibackend.service.RoleService;
 import com.shuaigef.lantuapibackend.service.UserService;
@@ -88,11 +90,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         this.validateUser(user, false);
 
         // 验证码校验
-        String currentVerificationCode = stringRedisTemplate.opsForValue()
-                .get(RedisConstant.VERIFICATION_CODE_KEY + email);
+        String redisKey = VerificationCodeBizEnum.EMAIL_REGISTER.getValue() + RedisConstant.VERIFICATION_CODE_KEY + email;
+        String currentVerificationCode = stringRedisTemplate.opsForValue().get(redisKey);
         if (!verificationCode.equals(currentVerificationCode)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误");
         }
+        // 删除已使用验证码
+        stringRedisTemplate.delete(redisKey);
 
         // 生成签名 ak sk
         String accessKey = DigestUtil.md5Hex(SALT + username + RandomUtil.randomNumbers(5));
@@ -250,6 +254,36 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         updateWrapper.eq(User::getId, userId)
                 .set(User::getUserPoints, user.getUserPoints() - reducePoints);
         return this.update(updateWrapper);
+    }
+
+    @Override
+    public boolean updateUserEmail(UserEmailUpdateRequest userEmailUpdateRequest) {
+        String email = userEmailUpdateRequest.getEmail();
+        String verificationCode = userEmailUpdateRequest.getVerificationCode();
+
+        // 验证码校验
+        String redisKey = VerificationCodeBizEnum.EMAIL_UPDATE.getValue() + RedisConstant.VERIFICATION_CODE_KEY + email;
+        String currentVerificationCode = stringRedisTemplate.opsForValue().get(redisKey);
+        if (!verificationCode.equals(currentVerificationCode)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误");
+        }
+        // 删除已使用验证码
+        stringRedisTemplate.delete(redisKey);
+
+        long currentUserId = SecurityUtils.getCurrentUserId();
+
+        // 邮箱已使用
+        User user = this.getOne(new LambdaQueryWrapper<User>()
+                .eq(User::getEmail, email)
+                .ne(User::getId, currentUserId));
+        if (user != null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱已使用");
+        }
+
+        user = new User();
+        user.setId(currentUserId);
+        user.setEmail(email);
+        return this.updateById(user);
     }
 
     @Override

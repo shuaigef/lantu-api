@@ -3,6 +3,7 @@ package com.shuaigef.lantuapibackend.controller;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.extra.mail.MailUtil;
 import com.shuaigef.lantuapibackend.common.utils.JwtUtils;
+import com.shuaigef.lantuapibackend.common.utils.RegexUtils;
 import com.shuaigef.lantuapibackend.common.utils.SecurityUtils;
 import com.shuaigef.lantuapibackend.constant.RedisConstant;
 import com.shuaigef.lantuapibackend.constant.SecurityConstant;
@@ -12,6 +13,7 @@ import com.shuaigef.lantuapibackend.model.dto.user.UserRegisterRequest;
 import com.shuaigef.lantuapibackend.model.dto.user.VerificationCodeSendRequest;
 import com.shuaigef.lantuapibackend.model.entity.Authority;
 import com.shuaigef.lantuapibackend.model.entity.SessionUser;
+import com.shuaigef.lantuapibackend.model.enums.VerificationCodeBizEnum;
 import com.shuaigef.lantuapibackend.model.vo.LoginUserVO;
 import com.shuaigef.lantuapibackend.service.AuthorityService;
 import com.shuaigef.lantuapibackend.service.UserService;
@@ -100,31 +102,42 @@ public class SystemController {
         return ResultUtils.success(userService.register(userRegisterRequest), "注册成功");
     }
 
-    @ApiOperation("注册接口-发送邮箱验证码")
+    @ApiOperation("验证码发送接口")
     @PostMapping("/send")
     public BaseResponse sendVerificationCode(@Valid @RequestBody VerificationCodeSendRequest verificationCodeSendRequest) {
-        // 邮箱
-        String email = verificationCodeSendRequest.getEmail();
-        // 需要一分钟才能再次发送
-        if (stringRedisTemplate.hasKey(RedisConstant.INTERVAL_KEY + email)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请一分钟后重试");
+        String target = verificationCodeSendRequest.getTarget();
+        String biz = verificationCodeSendRequest.getBiz();
+        VerificationCodeBizEnum verificationCodeBizEnum = VerificationCodeBizEnum.getEnumByValue(biz);
+        if (verificationCodeBizEnum == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
 
-        // 验证码 - 随机6位数数字验证码
-        String verificationCode = RandomUtil.randomNumbers(6);
-        // 存入 redis
-        stringRedisTemplate.opsForValue().set(
-                RedisConstant.VERIFICATION_CODE_KEY + email,
-                verificationCode,
-                RedisConstant.VERIFICATION_CODE_TIME,
-                RedisConstant.VERIFICATION_CODE_TIME_UNIT);
-        stringRedisTemplate.opsForValue().set(
-                RedisConstant.INTERVAL_KEY + email,
-                "true",
-                RedisConstant.INTERVAL_KEY_TIME,
-                RedisConstant.INTERVAL_KEY_TIME_UNIT);
-        // 发送邮件
-        MailUtil.send(email, "蓝图API开放平台注册验证码", "【蓝图API开放平台】验证码 " + verificationCode + " 用于邮箱注册验证，5分钟内有效，请勿泄漏和转发。", false);
+        if (verificationCodeBizEnum.equals(VerificationCodeBizEnum.EMAIL_REGISTER) || verificationCodeBizEnum.equals(VerificationCodeBizEnum.EMAIL_UPDATE)) {
+            if (!RegexUtils.isEmail(target)) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱错误");
+            }
+            // 需要一分钟才能再次发送
+            if (stringRedisTemplate.hasKey(biz + RedisConstant.INTERVAL_KEY + target)) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "请一分钟后重试");
+            }
+
+            // 验证码 - 随机6位数数字验证码
+            String verificationCode = RandomUtil.randomNumbers(6);
+            // 存入 redis
+            stringRedisTemplate.opsForValue().set(
+                    biz + RedisConstant.VERIFICATION_CODE_KEY + target,
+                    verificationCode,
+                    5l,
+                    TimeUnit.MINUTES);
+            stringRedisTemplate.opsForValue().set(
+                    biz + RedisConstant.INTERVAL_KEY + target,
+                    "true",
+                    1l,
+                    TimeUnit.MINUTES);
+            // 发送邮件
+            MailUtil.send(target, "蓝图API开放平台", "【蓝图API开放平台】验证码 " + verificationCode + " 用于" + verificationCodeBizEnum.getText() + "验证，5分钟内有效，请勿泄漏和转发。", false);
+        }
+
         return ResultUtils.success();
     }
 

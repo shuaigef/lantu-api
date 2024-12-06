@@ -8,6 +8,7 @@ import com.shuaigef.lantuapibackend.common.utils.JwtUtils;
 import com.shuaigef.lantuapibackend.common.utils.SecurityUtils;
 import com.shuaigef.lantuapibackend.exception.BusinessException;
 import com.shuaigef.lantuapibackend.model.dto.user.UserAddRequest;
+import com.shuaigef.lantuapibackend.model.dto.user.UserEmailUpdateRequest;
 import com.shuaigef.lantuapibackend.model.dto.user.UserQueryRequest;
 import com.shuaigef.lantuapibackend.model.dto.user.UserUpdatePasswordRequest;
 import com.shuaigef.lantuapibackend.model.dto.user.UserUpdatePersonalDetailRequest;
@@ -152,5 +153,10 @@ public class UserController {
         return ResultUtils.success(userService.getUserVO(userService.getCurrentUser()));
     }
 
+    @ApiOperation("用户修改邮箱")
+    @PutMapping("/email")
+    public BaseResponse<Boolean> updateUserEmail(@Valid @RequestBody UserEmailUpdateRequest userEmailUpdateRequest) {
+        return ResultUtils.success(userService.updateUserEmail(userEmailUpdateRequest), "邮箱修改成功");
+    }
 
 }

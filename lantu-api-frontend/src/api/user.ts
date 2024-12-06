@@ -68,3 +68,11 @@ export async function getMyUserDetail() {
     })
 }
 
+export async function updateUserEmail(data: API.UserEmailUpdateParams) {
+    return http.request<boolean>({
+        url: "/manage/user/email",
+        method: "PUT",
+        data: data
+    })
+}
+

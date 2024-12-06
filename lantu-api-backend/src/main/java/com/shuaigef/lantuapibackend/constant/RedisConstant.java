@@ -12,22 +12,12 @@ public interface RedisConstant {
     /**
      * 邮箱验证码 key
      */
-    String VERIFICATION_CODE_KEY = "verification_code_key:";
-    /**
-     * 邮箱验证码有效时间 5分钟
-     */
-    Long VERIFICATION_CODE_TIME = 5l;
-    TimeUnit VERIFICATION_CODE_TIME_UNIT = TimeUnit.MINUTES;
+    String VERIFICATION_CODE_KEY = "_verification_code_key:";
 
     /**
      * 验证码发送间隔 key
      */
-    String INTERVAL_KEY = "interval_key:";
-    /**
-     * 验证码发送间隔时间 1分钟
-     */
-    Long INTERVAL_KEY_TIME = 1l;
-    TimeUnit INTERVAL_KEY_TIME_UNIT = TimeUnit.MINUTES;
+    String INTERVAL_KEY = "_interval_key:";
 
     /**
      * 用户登录 key

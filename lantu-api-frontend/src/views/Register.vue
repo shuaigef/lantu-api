@@ -44,9 +44,10 @@ import {onMounted, ref} from "vue";
 import {listRole} from "../api/role";
 import {Message} from "@arco-design/web-vue";
 import {getInterfaceInfoById} from "../api/interfaceInfo";
-import {register, sendEmailVerificationCode} from "../api/system";
+import {register, sendVerificationCode} from "../api/system";
 import {useRouter} from "vue-router";
 import { useIntervalFn } from '@vueuse/core'
+import {VerificationCodeBizEnum} from "../constants/index";
 
 // region 倒计时
 const time = ref(0)
@@ -62,7 +63,7 @@ onMounted(() => {
 })
 const handleSend = async () => {
   try {
-    const res = await sendEmailVerificationCode(formData.value.email)
+    const res = await sendVerificationCode(formData.value.email, VerificationCodeBizEnum.EMAIL_REGISTER)
     if (res.code === 0) {
       time.value = 60
       resume()
@@ -79,9 +80,10 @@ const router = useRouter()
 
 const formData = ref<API.UserRegisterParams>({
   username: "",
+  email: "",
   password: "",
   checkPassword: "",
-  roleId: ""
+  verificationCode: ""
 })
 
 const onSubmit = async () => {

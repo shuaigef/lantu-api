@@ -31,9 +31,10 @@ declare namespace API {
 
     type UserRegisterParams = {
         username?: string,
+        email?: string,
         password?: string,
         checkPassword?: string,
-        roleId?: string
+        verificationCode?: string
     }
 
     type SessionUser = {
@@ -197,6 +198,11 @@ declare namespace API {
         oldPassword?: string,
         newPassword?: string,
         checkPassword?: string
+    }
+
+    type UserEmailUpdateParams = {
+        email: string,
+        verificationCode: string
     }
     // endregion
 

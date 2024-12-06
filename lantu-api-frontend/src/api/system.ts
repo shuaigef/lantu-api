@@ -16,12 +16,13 @@ export async function register(body: API.UserRegisterParams) {
     })
 }
 
-export async function sendEmailVerificationCode(email: string) {
+export async function sendVerificationCode(target: string, biz: string) {
     return http.request({
         url: "/system/send",
         method: "POST",
         data: {
-            email
+            target,
+            biz
         }
     })
 }

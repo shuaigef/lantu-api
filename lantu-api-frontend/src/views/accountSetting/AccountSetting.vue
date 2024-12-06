@@ -28,6 +28,11 @@
     </div>
   </a-card>
 
+  <a-card title="账号绑定" :bordered="false">
+    <span>邮箱：</span><span>{{ userDetail.email }}</span><a-link style="margin-left: 100px" @click="() => {updateUserEmailVisible = true}">修改</a-link>
+  </a-card>
+  <UpdateUserEmailModal v-model:visible="updateUserEmailVisible" @ok="handleUpdateEmail"/>
+
   <a-card title="修改密码" :bordered="false">
     <template #extra>
       <a-button type="primary" @click="handleUpdatePassword">保存</a-button>
@@ -53,11 +58,19 @@
 <!--    </template>-->
     <div>
       <div>
-        <span>我的积分：</span><span style="color: #f10909; font-size: 16px">{{ userDetail.userPoints || 0 }}</span>
+        <span>我的积分：</span><span style="color: #f10909; font-size: 16px">{{ userDetail.userPoints }}</span>
       </div>
       <a-button style="margin-top: 15px" type="primary" :disabled="isCheckinFlag" @click="handleCheckin">每日签到</a-button>
     </div>
   </a-card>
+
+  <a-card title="API密钥" :bordered="false">
+    <a-descriptions size="large" :column="1">
+      <a-descriptions-item label="accessKey">{{ userDetail.accessKey }}</a-descriptions-item>
+      <a-descriptions-item label="secretKey">{{ userDetail.secretKey }}</a-descriptions-item>
+    </a-descriptions>
+  </a-card>
+
 </template>
 
 <script setup lang="ts">
@@ -72,10 +85,26 @@ import {LocalStorageEnum} from "../../constants/index";
 import {useRouter} from "vue-router";
 import {logout} from "../../api/system";
 import {handleDailyCheckin, isCheckin} from "../../api/dailyCheckin";
+import UpdateUserEmailModal from "./components/UpdateUserEmailModal.vue";
 
 const systemStore = useSystemStore()
 const { loginUser } = storeToRefs(systemStore)
-const userDetail = ref<API.User>()
+const userDetail = ref<API.User>({
+  id: "",
+  username: "",
+  nickname: "",
+  userAvatar: "",
+  userProfile: "",
+  gender: 0,
+  email: "",
+  phoneNumber: "",
+  roleId: "",
+  userRole: "",
+  userPoints: 0,
+  accessKey: "",
+  secretKey: "",
+  createTime: ""
+})
 
 const personalDetailFormData = ref<API.UserUpdatePersonalDetailParams>({
   username: loginUser.value.userInfo.username,
@@ -179,6 +208,11 @@ const init = async () => {
   }
 }
 init()
+
+const updateUserEmailVisible = ref(false)
+const handleUpdateEmail = () => {
+  init()
+}
 </script>
 
 <style scoped lang="scss">

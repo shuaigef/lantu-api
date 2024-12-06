@@ -3,6 +3,7 @@ package com.shuaigef.lantuapibackend.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.shuaigef.lantuapibackend.model.dto.user.UserAddRequest;
+import com.shuaigef.lantuapibackend.model.dto.user.UserEmailUpdateRequest;
 import com.shuaigef.lantuapibackend.model.dto.user.UserQueryRequest;
 import com.shuaigef.lantuapibackend.model.dto.user.UserRegisterRequest;
 import com.shuaigef.lantuapibackend.model.dto.user.UserUpdatePasswordRequest;
@@ -98,6 +99,14 @@ public interface UserService extends IService<User> {
      * @return 是否成功
      */
     boolean reduceUserPoints(long userId, int reducePoints);
+
+    /**
+     * 用户邮箱修改
+     *
+     * @param userEmailUpdateRequest
+     * @return
+     */
+    boolean updateUserEmail(UserEmailUpdateRequest userEmailUpdateRequest);
 
     /**
      * 用户信息脱敏
